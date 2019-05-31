@@ -19,3 +19,7 @@ const ArticleSchema = new Schema ({
         required: true
     }
 });
+
+const Articles = mongoose.model("Articles", ArticleSchema);
+
+module.exports = Articles;
