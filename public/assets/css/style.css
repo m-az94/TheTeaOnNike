@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css?family=Anton&display=swap');
+*{
+    font-family: 'Anton', sans-serif;
+}
+header{
+    background:#000;
+    text-align: center;
+    border-bottom: 8px solid orangered;
+}
+#app-name{
+    color: orangered;
+    font-size: 70px;
+}
+#teacup{
+    width: 100px;
+    height: auto;
+}
+.container{
+    margin: 15px;
+    text-align: center;
+}
+#add-shoes, #saved-shoes, .save-btn, .note-btn, #back-to-home{
+    color: orangered;
+    border-color: orangered;
+    font-size: 20px;
+}

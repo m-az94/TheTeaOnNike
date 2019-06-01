@@ -8,22 +8,24 @@ const cheerio = require("cheerio");
 const db = require("./models");
 const PORT = 3001;
 
-//--- Initialize Express and Configure Middleware ----
+//---- Initialize Express and Configure Middleware ----
 const app = express();
 app.use(logger("dev"));
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 app.use(express.static("public"));
+
+//---- Set Up Handlebars ----
 app.engine("handlebars",handlebars({defaultLayout:"main"}));
 app.set("view engine", "handlebars");
 
-//--- Connect to mLab on Heroku ---
+//---- Connect to mLab on Heroku ---
 let MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 mongoose.connect(MONGODB_URI);
 
 //---- API Routes ----
 app.get("/scrape", (req,res) => {
-    //---- Scrape Data from Nike ----
+    // Scrape Data from Nike 
     axios.get("https://store.nike.com/ca/en_gb/pw/mens-shoes/7puZoi3?ipp=120").then(function(response){
         let $ = cheerio.load(response.data);
         let results = [];
@@ -41,7 +43,7 @@ app.get("/scrape", (req,res) => {
             });
         });
 
-        //---- Create New Articles Using Results from Scraping ----
+        // Create New Articles Using Results from Scraping
         db.Articles.create(results)
         .then(dbArticles => console.log(dbArticles))
         .catch(err => console.log(err));
@@ -49,14 +51,26 @@ app.get("/scrape", (req,res) => {
     res.send("Scrape Complete");
 });
 
-//---- Getting All Articles from db ----
+// Getting All Articles from db
 app.get("/articles", (req, res) => {
     db.Articles.find({})
     .then(dbArticles=>res.json(dbArticles))
     .catch(err => res.json(err));
 });
 
-//---- Getting One Article from db ----
+// Need Saved route 
+app.put("/articlessaved/:id",(req, res)=>{
+    db.Articles.findOneAndUpdate(
+        {_id:req.params.id},
+        {$set: {saved: true}},
+        {new: true})
+    .then(dbArticles => res.json(dbArticles))
+    .catch(err => res.json(err));
+});
+
+// Need put route for changing article to saved 
+
+// Getting One Article from db 
 app.get("/articles/:id", (req, res) => {
     db.Articles.findOne({_id:req.params.id})
     .populate("Notes")
@@ -64,24 +78,25 @@ app.get("/articles/:id", (req, res) => {
     .catch(err => res.json(err));
 });
 
-//---- Getting all Notes ----
+// Getting all Notes -- Not neccessarily
 app.get("/notes", (req, res) =>{
     db.Notes.find({})
     .then(dbNotes => res.json(dbNotes))
     .catch(err => res.json(err));
 });
 
-//---- Saving Article Associated with Note ---
+// Saving Article Associated with Note
 app.post("/articles/:id", (req, res) =>{
     db.Notes.create(req.body)
     .then(dbNotes => db.Articles.findOneAndUpdate(
         {_id: req.params.id},
-        {notes: dbNotes._id}
-    )).then( dbArticles => res.json(dbArticles))
+        {notes: dbNotes._id}, 
+        {new: true}
+    )).then(dbArticles => res.json(dbArticles))
     .catch(err => res.json(err));
 });
 
-//---- Delete all Notes from Article db ----
+// Delete all Notes from Article db
 app.delete("articles/:id", (req, res) => {
     db.Articles.findOneAndUpdate(
         {_id: req.params.id}, 
@@ -90,12 +105,16 @@ app.delete("articles/:id", (req, res) => {
     .catch( err => res.json(err));
 });
 
-//---- Delete One Note from Notes db ----
+// Delete One Note from Notes db
 app.delete("/notes/:id", (req, res) => {
     db.Notes.remove({_id: req.params.id})
     .then(dbNotes => res.json(dbNotes))
     .catch(err => res.json(err));
 });
+
+//---- HTML Routes ----
+app.get("/", (req, res) => res.render("index"));
+app.get ("/saved", (req, res) => res.render("saved"));
 
 //---- Start Server ----
 app.listen(PORT, function() {
