@@ -17,6 +17,10 @@ const ArticleSchema = new Schema ({
     price:{
         type:String,
         required: true
+    },
+    notes: {
+        type: Schema.Types.ObjectId,
+        ref: "Notes"
     }
 });
 
