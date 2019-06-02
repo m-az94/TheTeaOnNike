@@ -53,13 +53,13 @@ app.get("/scrape", (req,res) => {
 
 // Getting All Articles from db
 app.get("/articles", (req, res) => {
-    db.Articles.find({})
+    db.Articles.find({saved: false})
     .then(dbArticles=>res.json(dbArticles))
     .catch(err => res.json(err));
 });
 
-// Need Saved route 
-app.put("/articlessaved/:id",(req, res)=>{
+// Update One Article to Save 
+app.put("/saved/:id",(req, res)=>{
     db.Articles.findOneAndUpdate(
         {_id:req.params.id},
         {$set: {saved: true}},
@@ -68,19 +68,35 @@ app.put("/articlessaved/:id",(req, res)=>{
     .catch(err => res.json(err));
 });
 
-// Need put route for changing article to saved 
-
-// Getting One Article from db 
-app.get("/articles/:id", (req, res) => {
-    db.Articles.findOne({_id:req.params.id})
-    .populate("Notes")
+// Update One Article to Unsave 
+app.put("/unsaved/:id",(req, res)=>{
+    db.Articles.findOneAndUpdate(
+        {_id:req.params.id},
+        {$set: {saved: false}},
+        {new: true})
     .then(dbArticles => res.json(dbArticles))
     .catch(err => res.json(err));
 });
 
-// Getting all Notes -- Not neccessarily
-app.get("/notes", (req, res) =>{
-    db.Notes.find({})
+
+// Need put route for changing article to saved 
+app.get("/saves", (req, res)=>{
+    db.Articles.find({saved: true})
+    .then(dbArticles => res.json(dbArticles))
+    .catch(err => res.json(err));
+});
+
+// Getting One Article from db and populating with notes
+app.get("/pop-articles/:id", (req, res) => {
+    db.Articles.findOne({_id:req.params.id})
+    .populate("notes")
+    .then(dbArticles => res.json(dbArticles))
+    .catch(err => res.json(err));
+});
+
+// Getting Notes by IDs
+app.get("/notes/:id", (req, res) =>{
+    db.Notes.find({article_id: req.params.id})
     .then(dbNotes => res.json(dbNotes))
     .catch(err => res.json(err));
 });
@@ -96,18 +112,18 @@ app.post("/articles/:id", (req, res) =>{
     .catch(err => res.json(err));
 });
 
-// Delete all Notes from Article db
-app.delete("articles/:id", (req, res) => {
-    db.Articles.findOneAndUpdate(
-        {_id: req.params.id}, 
-        {$unset:{notes: 1}}
-    ).then(dbArticles => res.json(dbArticles))
-    .catch( err => res.json(err));
-});
+// // Delete all Notes from Article db - nolonger needed
+// app.delete("articles/:id", (req, res) => {
+//     db.Articles.findOneAndUpdate(
+//         {_id: req.params.id}, 
+//         {$unset:{notes: 1}}
+//     ).then(dbArticles => res.json(dbArticles))
+//     .catch( err => res.json(err));
+// });
 
 // Delete One Note from Notes db
 app.delete("/notes/:id", (req, res) => {
-    db.Notes.remove({_id: req.params.id})
+    db.Notes.deleteOne({_id: req.params.id})
     .then(dbNotes => res.json(dbNotes))
     .catch(err => res.json(err));
 });

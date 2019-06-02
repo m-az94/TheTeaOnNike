@@ -19,7 +19,7 @@ header{
     margin: 15px;
     text-align: center;
 }
-#add-shoes, #saved-shoes, .save-btn, .note-btn, #back-to-home{
+#add-shoes, #saved-shoes, .save-btn, .note-btn, #back-to-home, .delete-btn{
     color: orangered;
     border-color: orangered;
     font-size: 20px;
