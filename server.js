@@ -108,7 +108,8 @@ app.post("/articles/:id", (req, res) =>{
         {_id: req.params.id},
         {notes: dbNotes._id}, 
         {new: true}
-    )).then(dbArticles => res.json(dbArticles))
+    )).populate("notes")
+    .then(dbArticles => res.json(dbArticles))
     .catch(err => res.json(err));
 });
 

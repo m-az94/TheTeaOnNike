@@ -131,7 +131,13 @@ $(document).on("click", ".submit-btn", event =>{
             body: input
         }
     })
-    .then(data => console.log(data))
+    .then(data => {
+        console.log(data);
+        let x = $("<a>").attr("class", "note").text("Message: "+input +" ");
+        let btn = $("<button>").attr("class", "del-btn").attr("data-id", thisId).text("Delete");
+        $(x).append(btn);
+        $("#"+thisId).append(x);
+    })
     .catch(err => console.log(err));
     $(".input-note").val('');
 });
